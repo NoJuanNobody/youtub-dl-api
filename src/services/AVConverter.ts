@@ -8,14 +8,24 @@ import youtubedl from 'youtube-dl';
  * @param video
  */
 async function convertToAudio(ref: string): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    const fsRef = await fs.createReadStream(`files/${ref}.mp4`);
+    return await ffmpeg()
+      .input(fsRef)
+      .output(`files/${ref}.mp3`)
+      .on('end', () => {
+        console.log("audio converted")
+        return resolve(`files/${ref}.mp3`)
+      }
+      )
+      .on('error', () => {
+        console.log('reject')
+        return reject();
+      }
+      )
+      .run();
+  })
 
-  //  TODO: implement fluent ffmpeg to convert a video to an audio file
-  const fsRef = fs.createReadStream(`files/${ref}`);
-  ffmpeg()
-    .input(fsRef)
-    .output(`files/${ref}.mp3`)
-    .run();
-  return `files/${ref}.mp3`
 }
 
 /**
@@ -23,36 +33,29 @@ async function convertToAudio(ref: string): Promise<string> {
  * @param url - url of the video to be downloaded
  */
 async function requestVideo(url: string) {
-  console.log(url);
-  let name = '';
-  const video = youtubedl(url,
-    // Optional arguments passed to youtube-dl.
-    ['--format=18'],
-    // Additional options can be given for calling `child_process.execFile()`.
-    {cwd: __dirname})
+  return new Promise((resolve, reject) => {
+    const video = youtubedl(`https://www.youtube.com/watch?v=${url}`,
+      ['--format=18'],
+      {cwd: __dirname});
 
-  // Will be called when the download starts.
-  video.on('info', function (info) {
-    console.log('Download started')
-    name = info._filename;
-    console.log(name);
-    video.pipe(fs.createWriteStream(`files/${info._filename}`, {flags: 'a'}));
-    console.log('filename: ' + info._filename)
-    console.log('size: ' + info.size)
-  })
-  // TODO: add error handling to avoid empty mp4 files
+    video.on('info', function (info) {
+      console.log('Download started')
+      console.log('filename: ' + info._filename)
+      console.log('size: ' + info.size)
 
-  video.on('complete', function complete(info) {
-    'use strict'
-    console.log('filename: ' + info._filename + ' already downloaded.')
+    })
 
-  })
 
-  video.on('end', function (info) {
-    console.log('finished downloading!')
-    convertToAudio(name)
-  })
+
+    video.on('end', async function () {
+      console.log('finished downloading!')
+      return resolve(convertToAudio(url));
+    })
+    video.on('error', (e) => e ? reject(e) : null)
+
+    video.pipe(fs.createWriteStream(`files/${url}.mp4`, {flags: 'a'}));
+  });
 }
 
-export {requestVideo};
+export {requestVideo, convertToAudio};
 

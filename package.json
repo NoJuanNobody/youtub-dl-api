@@ -55,7 +55,9 @@
     "@loopback/service-proxy": "^2.0.4",
     "@types/youtube-dl": "^1.12.2",
     "fluent-ffmpeg": "^2.1.2",
+    "stream": "0.0.2",
     "tslib": "^1.10.0",
+    "web-audio-stream": "^3.0.1",
     "youtube-dl": "^3.0.2"
   },
   "devDependencies": {
