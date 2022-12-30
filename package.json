@@ -61,7 +61,7 @@
     "youtube-dl": "^3.0.2"
   },
   "devDependencies": {
-    "@loopback/build": "^5.0.1",
+    "@loopback/build": "^5.4.3",
     "@loopback/eslint-config": "^6.0.3",
     "@loopback/testlab": "^3.0.1",
     "@types/fluent-ffmpeg": "^2.1.14",
